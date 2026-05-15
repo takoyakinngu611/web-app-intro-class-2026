@@ -6,6 +6,34 @@
     <title>TODO App</title>
   </head>
   <body>
+
+    <header>
+         <h1>TODO App</h1>
+    </header>
+    <main>
+      <form id="todo-form">
+        <input type="text" id="todo-input" placeholder="新しいTODOを入力">
+        <input type="text" id="day-input" placeholder="(例: 月曜日)">
+        <button type="submit">追加</button>
+    </form>
+    <ul id="todo-list">
+      <li>
+         <label>
+             <input type="checkbox">
+             <span>水曜日 買い物に行く</span>
+             <p>
+              <input type="checkbox">
+             <span>火曜日 ゴミ捨て</span>
+             </p>
+             <p>
+              <input type="checkbox">
+             <span>金曜日 筋トレ</span>
+             </p>
+         </label>
+         <button>削除</button>
+      </li>
+    </ul>
+    </main>
     <!-- ============================================
        TODOアプリの HTML を作ろう
 

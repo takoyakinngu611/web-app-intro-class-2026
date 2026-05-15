@@ -3,16 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>自己紹介ページ</title>
+    <title>タイトルを変えました</title>
   </head>
   <body>
     <!-- ============================================
          実習2: 基本的なHTMLページ
          まずは以下のh1とpを自分の内容に書き換えてみよう
     ============================================ -->
-    <h1>はじめてのWebページ</h1>
-    <p>HTMLの勉強を始めました！</p>
+    <header>
+    <h1>初めてのWebページ</h1>
+    <p>HTMLの勉強を始めました</p>
+</header>
+    
+    <main>
+    <section>
+    <h2>自己紹介</h2>
+    <p>名前:ケリュドラ！</p>
+    </section>
 
+    <section>
+    <h1>スキルのアップデート中！アプリ開発に興味あります</h1>
+    <h2>趣味</h2>
+    <li>
+       <ul>音楽を聞くこと(洋楽、jpop,hiphop)</ul>
+       <ul>映画を見ること(邦画、洋画)</ul>
+       <ul>弓道</ul>
+    </li>
+</section>
+
+</main>
+
+<form>
+   <div>
+       <label for="name">名前:</label>
+       <input type="text" id="name" placeholder="山田太郎">
+   </div>
+   <div>
+       <label for="email">メール</label>
+       <input type="email" id="email" placeholder="example@mail.com"
+   </div>
+   <div>
+<button type="submit">送信</button>
+   </div>
+</form>
     <!-- ============================================
          実習3: 自己紹介ページを作ろう
          以下のTODOコメントに従って、内容を追加してください
