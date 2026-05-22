@@ -6,6 +6,28 @@
    このファイルを読み込んでからスタイルを書いていこう
    =========================================== */
 
+  h1 {
+    color: black;
+    font-size: 40px;
+    text-align: center
+  }
+
+#page .todo-item{
+  color: greenyellow;
+  text-align: center;
+  background-color: #f0f0f0
+}
+
+.todo-title {
+  text-align: center;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* --- 1. リセットと基本設定 ---
    ヒント: * で全要素の margin/padding を 0 に
           box-sizing: border-box でサイズ計算を楽に */
@@ -44,6 +66,11 @@ body {
 }
 
 .todo-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
   /* ヒント: flex: 1, padding: 12px 16px, border: 2px solid #d1d5db
              border-radius: 8px, font-size: 16px */
 }
@@ -53,11 +80,18 @@ body {
 }
 
 .todo-button {
+  padding: 12px 24;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
   /* ヒント: padding: 12px 24px, background-color: #2563eb
              color: white, border: none, border-radius: 8px, cursor: pointer */
 }
 
 .todo-button:hover {
+  background-color: #1d4ed8;
   /* ヒント: background-color: #1d4ed8 */
 }
 
@@ -74,6 +108,7 @@ body {
 }
 
 .todo-item:hover {
+  background-color: #f9fafb;
   /* ヒント: background-color: #eff6ff */
 }
 
