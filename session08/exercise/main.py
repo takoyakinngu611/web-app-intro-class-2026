@@ -56,7 +56,10 @@ def init_db():
 #           title: str = Field(min_length=1, max_length=100) に書き換える
 class TodoCreate(BaseModel):
     title: str  # ← ここにバリデーションを追加
+from pydantic import BaseModel, Field
 
+class TodoCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
 
 class TodoUpdate(BaseModel):
     done: bool
@@ -91,11 +94,11 @@ def create_todo(todo: TodoCreate):
     # TODO(実習4): パラメータバインディングに修正してください
     #   修正前（危険）: f-string でユーザー入力を直接SQL文に埋め込んでいる
     #   修正後（安全）:
-    #     cursor.execute(
-    #         "INSERT INTO todos (title, done) VALUES (?, 0)",
-    #         (todo.title,)
-    #     )
-    cursor.execute(f"INSERT INTO todos (title, done) VALUES ('{todo.title}', 0)")
+    cursor.execute(
+             "INSERT INTO todos (title, done) VALUES (?, 0)",
+            (todo.title,)
+        )
+    #cursor.execute(f"INSERT INTO todos (title, done) VALUES ('{todo.title}', 0)")
     conn.commit()
     todo_id = cursor.lastrowid
 
@@ -121,11 +124,11 @@ def update_todo(todo_id: int, todo: TodoUpdate):
 
     # TODO(実習4): パラメータバインディングに修正してください
     #   修正後:
-    #     cursor.execute(
-    #         "UPDATE todos SET done = ? WHERE id = ?",
-    #         (int(todo.done), todo_id)
-    #     )
-    cursor.execute(f"UPDATE todos SET done = {int(todo.done)} WHERE id = {todo_id}")
+    cursor.execute(
+             "UPDATE todos SET done = ? WHERE id = ?",
+             (int(todo.done), todo_id)
+         )
+    #cursor.execute(f"UPDATE todos SET done = {int(todo.done)} WHERE id = {todo_id}")
     conn.commit()
 
     conn.close()
@@ -149,8 +152,8 @@ def delete_todo(todo_id: int):
 
     # TODO(実習4): パラメータバインディングに修正してください
     #   修正後:
-    #     cursor.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
-    cursor.execute(f"DELETE FROM todos WHERE id = {todo_id}")
+    cursor.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
+    #cursor.execute("DELETE FROM todos WHERE id = {todo_id}")
     conn.commit()
 
     conn.close()
