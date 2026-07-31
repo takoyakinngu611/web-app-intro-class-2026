@@ -39,12 +39,20 @@ def init_db():
     #   title : TODOの内容（空はNG）
     #   done  : 完了したかどうか（0=未完了, 1=完了）
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS todos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            done INTEGER DEFAULT 0
+        CREATE TABLE IF NOT EXISTS game_status (
+            character_name TEXT NOT NULL,
+            level INTEGER NOT NULL,
+            exp INTEGER NOT NULL,
+            next_exp INTEGER NOT NULL
         )
     """)
+
+    cursor.execute("SELECT COUNT(*) FROM game_status")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("INSERT INTO game_status (character_name,level,exp,next_exp) VALUES(?,?,?,?)",
+                       ("勇者",1,0,100)
+                       )
+    
     conn.commit()  # 変更を確定して保存する
     conn.close()  # 接続を閉じる
 
@@ -60,10 +68,7 @@ class TodoCreate(BaseModel):
     title: str = Field(min_length=1, max_length=100)
 
 
-class TodoCreate(BaseModel):
-    # TODOを更新するときに受け取るデータ
-    # done は True / False（完了したかどうか）
-    done: str = Field(min_length=1, max_length=100)
+class TodoUpdate(BaseModel): done: bool
 
 
 # --- APIエンドポイント ---
@@ -72,7 +77,7 @@ class TodoCreate(BaseModel):
 
 
 @app.get("/todos")  # GET /todos にアクセスされたら実行
-def get_skills():
+def get_todos():
     """TODO一覧を取得する"""
     conn = sqlite3.connect(DATABASE)  # 接続する
     cursor = conn.cursor()
@@ -101,6 +106,7 @@ def create_todo(todo: TodoCreate):
     # ? を使うことで、危険な文字列が混ざってもSQLが壊れない（SQLインジェクション対策）
     cursor.execute(
         "INSERT INTO todos (title, done) VALUES (?, 0)",
+        (todo.title,),
     )
     conn.commit()  # 追加を確定する
     todo_id = cursor.lastrowid  # たった今追加した行の id を取得する
@@ -110,8 +116,8 @@ def create_todo(todo: TodoCreate):
 
 
 # PUT /todos/5 のように、URLの {todo_id} の部分が引数 todo_id に入る
-#@app.put("/todos/{todo_id}")
-#def update_todo(todo_id: int, todo: TodoUpdate):
+@app.put("/todos/{todo_id}")
+def update_todo(todo_id: int, todo: TodoUpdate):
     """TODOの完了状態を更新する"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -136,9 +142,9 @@ def create_todo(todo: TodoCreate):
     return {"id": todo_id, "title": existing[0], "done": todo.done}
 
 
-#@app.delete("/todos/{todo_id}")  # DELETE /todos/5 で id=5 のTODOを削除
-#def delete_todo(todo_id: int):
-    #"""TODOを削除する"""
+@app.delete("/todos/{todo_id}")  # DELETE /todos/5 で id=5 のTODOを削除
+def delete_todo(todo_id: int):
+    """TODOを削除する"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 

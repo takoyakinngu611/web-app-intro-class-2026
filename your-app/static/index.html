@@ -15,6 +15,27 @@
     <!-- メインコンテンツ -->
     <main class="todo-card">
       <!-- エラーメッセージ表示エリア -->
+          <div id="rpg-status-card" style="background: #f9f9f9; border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+        <h3>相棒ステータス</h3>
+
+        <!-- キャラ選択 -->
+         <div style="margin-bottom: 10px;">
+          <label for = "character-select">相棒を選ぶ:</label>
+          <select id = "character-select">
+            <option value="勇者">勇者</option>
+            <option value="弓使い">弓使い</option>
+            <option value="魔法使い">魔法使い</option>
+            <option value="召喚士">召喚士</option>
+            <option value="スライム">スライム(モンスター)</option>
+            <option value="ゴーレム">ゴーレム(モンスター)</option>
+          </select>
+         </div>
+
+         <!--ステータス表示-->
+         <p>現在の相棒:<span id = "char-name" style="font-weight: bold; color: #333;">勇者</span></p>
+         <p>レベル:<span id = "char-level" style="font-weight: bold; color: #007bff;">1</span></p>
+         <p>EXP:<span id = "char-exp">0</span> / <span id = "char-next-exp">100</span></p>
+      </div>
       <div id="error-message" class="error-message" style="display: none"></div>
 
       <!-- TODO入力エリア -->

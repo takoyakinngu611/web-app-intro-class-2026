@@ -40,7 +40,7 @@ async function loadTodos() {
     }
 
     // 返ってきたデータ(JSON)をJavaScriptの配列に変換する
-    const todoss = await response.json();
+    const todos = await response.json();
     renderTodos(todos); // 画面に描画する
   } catch (error) {
     // そもそもサーバーにつながらなかったときなど
@@ -152,8 +152,8 @@ async function deleteTodo(id) {
  *  入力を「ただの文字」として扱うことで、この攻撃を防いでいる。
  */
 function renderTodos(todos) {
-  const todolist = document.getElementById("todo-list");
-  todolist.innerHTML = ""; // 古い表示を一度すべて消してから描き直す
+  const list = document.getElementById("todo-list");
+  list.innerHTML = ""; // 古い表示を一度すべて消してから描き直す
 
   // todos配列の1件ずつ(todo)について、リストの行を作る
   todos.forEach((todo)  => {
@@ -191,7 +191,6 @@ function renderTodos(todos) {
     // <li> の中に [label][削除ボタン] を入れて、リストに追加する
     li.appendChild(label);
     li.appendChild(deleteBtn);
-
     list.appendChild(li);
   });
 }
