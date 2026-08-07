@@ -17,7 +17,11 @@
  */
 
 // サーバー側のAPIのアドレス（main.py の @app.get("/todos") などに対応）
+const STATUS_API_URL = "/api/status";
 const API_URL = "/todos";
+let currentCharacter = "勇者";
+let characterExp = 0;
+let nextExpNeeded = 100;
 
 // ============================================================
 // TODO操作（CRUD）
@@ -48,9 +52,65 @@ async function loadTodos() {
   }
 }
 
+async function fetchStatus() {
+  try {
+    const response = await fetch(STATUS_API_URL);
+    if (response.ok) {
+      const data = await response.json();
+      currentCharacter = data.character_name;
+      characterLevel = data.level;
+      characterExp = data.exp;
+      nextExpNeeded = data.next_exp;
+
+      const selectEl = document.getElementById("character-select");
+      if (selectEl) selectEl.value = currentCharacter;
+
+      updateCharacterStatusUI();
+    }
+  } catch (e) {
+     console.error("ステータスの習得に失敗しました", e);
+  }
+}
+
+function updateCharacterStatusUI() {
+  const nameEl = document.getElementById("char-name");
+  const levelEl = document.getElementById("char-level");
+  const expEl = document.getElementById("char-exp");
+  const nextExpEl = document.getElementById("char-next-exp");
+
+  if (nameEl) nameEl.textContent = currentCharacter;
+  if (levelEl) level.textContent = characterLevel;
+  if (expEl) expEl.textContent = characterExp;
+  if (nextExpEl) nextExpEl.textContent = nextExpNeeded;
+}
+
+const todoForm = document.getElementById("todo-form");
+if (todoForm) {
+  todoForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await addTodo();
+  });
+}
+
+
+const characterSelect = document.getElementById("character-select");
+if (characterSelect) {
+  characterSelect.addEventListener("change", async (event) => {
+    currentCharacter = event.target.value;
+    characterLevel = 1;
+    characterExp = 0;
+    nextExpNeeded = 100;
+    updateCharacterStatusUI();
+    await saveStatus();
+  });
+}
+
+fetchStatus();
+
 /**
  * 新しいTODOを追加する
  */
+
 async function addTodo() {
   // 入力欄の要素を取得し、入力された文字を読み取る（trimで前後の空白を除去）
   const input = document.getElementById("todo-input");
@@ -89,6 +149,7 @@ async function addTodo() {
   }
 }
 
+
 /**
  * TODOの完了状態を切り替える
  * id: 対象のTODOの番号 / currentDone: いまの完了状態(true/false)
@@ -109,6 +170,7 @@ async function toggleTodo(id, currentDone) {
     }
 
     await loadTodos(); // 一覧を取り直して、更新結果を画面に反映する
+    addExperience();
   } catch (error) {
     showError("通信エラーが発生しました");
   }

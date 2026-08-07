@@ -174,3 +174,38 @@ init_db()
 if __name__ == "__main__":
     # host="0.0.0.0" で外部からのアクセスも受け付ける。ポート8000で待ち受ける
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/api/status")
+def get_status():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT character_name, level, exp, next_exp FROM game_status")
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "character_name" : row[0],
+            "level" : row[1],
+            "exp" : row[2],
+            "next_exp" : row[3]
+        }
+    return {"character_name" : "勇者", "level" : 1, "exp" : 0, "next_exp" : 100}
+
+class StatusUpdate(BaseModel):
+    character_name: str
+    level: int
+    exp: int
+    next_exp: int
+
+@app.put("/api/status")
+def update_status(status: StatusUpdate):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""
+         UPDATE game_status
+         SET character_name = ?, level = ?, exp = ?, next_exp = ?
+    """, (status.character_name, status.level, status.exp, status.next_exp))
+    conn.commit()
+    conn.close()
+    return {"message": "Status updated successfully"}
+
