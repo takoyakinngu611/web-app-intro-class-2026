@@ -157,10 +157,11 @@ async function addTodo() {
 async function toggleTodo(id, currentDone) {
   try {
     // `${API_URL}/${id}` で /todos/5 のようなアドレスを作る（id=5のTODOが対象）
+    const nextDone = !currentDone;
     const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT", // PUT = 既存のデータを更新する
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ done: !currentDone }), // !で完了/未完了を反転させる
+      body: JSON.stringify({ done: nextDone }), // !で完了/未完了を反転させる
     });
 
     if (!response.ok) {
@@ -170,7 +171,11 @@ async function toggleTodo(id, currentDone) {
     }
 
     await loadTodos(); // 一覧を取り直して、更新結果を画面に反映する
-    addExperience();
+   
+    if (nextDone) {
+      await addExperience();
+    }
+    
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -276,11 +281,42 @@ function showError(message) {
 // イベントリスナー
 // ============================================================
 
-// フォームが送信された（追加ボタン or Enter）ときの動き
-document.getElementById("todo-form").addEventListener("submit", function (e) {
-  e.preventDefault(); // ページが再読み込みされる標準動作を止める
-  addTodo(); // 自分で用意した追加処理を呼ぶ
-});
+
 
 // ページ読み込み時に、まずTODO一覧を取得して表示する（ここがスタート地点）
 loadTodos();
+loadStatus(); // ← ここで一緒に読み込む！
+
+
+
+async function addExperience() {
+  characterExp += 10;
+
+  if (characterExp >= nextExpNeeded) {
+    characterExp -= nextExpNeeded;
+    characterLevel += 1;
+    nextExpNeeded += 50;
+  }
+  
+  updateCharacterStatusUI();
+  await saveStatus();
+}
+
+async function saveStatus() {
+  const response = await fetch(STATUS_API_URL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      character_name: currentCharacter,
+      level: characterLevel,
+      exp: characterExp,
+      next_exp: nextExpNeeded,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error("ステータスの保存に失敗しました");
+  }
+}

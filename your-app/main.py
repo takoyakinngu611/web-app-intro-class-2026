@@ -95,6 +95,8 @@ def get_todos():
 
     ]
 
+@app.get("/api/status")
+
 
 @app.post("/todos", status_code=201)  # POST /todos で新規作成（201=作成成功）
 def create_todo(todo: TodoCreate):
