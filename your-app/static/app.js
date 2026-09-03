@@ -171,11 +171,8 @@ async function toggleTodo(id, currentDone) {
     }
 
     await loadTodos(); // 一覧を取り直して、更新結果を画面に反映する
+    await fetchStatus();
    
-    if (nextDone) {
-      await addExperience();
-    }
-    
   } catch (error) {
     showError("通信エラーが発生しました");
   }
@@ -303,4 +300,28 @@ async function saveStatus() {
   if (!response.ok) {
     throw new Error("ステータスの保存に失敗しました");
   }
+}
+
+app.js
+function updateCharacterStatusUI() {
+ const nameEl = document.getElementById("char-name");
+ const levelEl = document.getElementById("char-level");
+const expEl = document.getElementById("char-exp");
+ const nextExpEl = document.getElementById("char-next-exp");
+ const imageEl = document.getElementById("character-image");
+
+ const characterImages = {
+  "勇者": "/character.jpg",
+  "弓使い": "/archer.jpg",
+  "魔法使い": "/mage.jpg",
+  "召喚士": "/summoner.jpg",
+  "スライム": "/slime.jpg",
+  "ゴーレム": "/golem.jpg",
+ };
+
+ if (nameEl) nameEl.textContent = currentCharacter;
+ if (levelEl) levelEl.textContent = characterLevel;
+ if (expEl) expEl.textContent = characterExp;
+ if (nextExpEl) nextExpEl.textContent = nextExpNeeded;
+ if (imageEl) imageEl.src = characterImages[currentCharacter];
 }

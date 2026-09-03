@@ -15,12 +15,13 @@
     <!-- メインコンテンツ -->
     <main class="todo-card">
       <!-- エラーメッセージ表示エリア -->
-          <div id="rpg-status-card" style="background: #f9f9f9; border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+      /*   
+      <div id="rpg-status-card" style="background: #f9f9f9; border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
         <h3>相棒ステータス</h3>
 
         <!-- キャラ選択 -->
          <div style="margin-bottom: 10px;">
-          <label for = "character-select">相棒を選ぶ:</label>
+          <label for = "character-select"-->相棒を選ぶ:</label>
           <select id = "character-select">
             <option value="勇者">勇者</option>
             <option value="弓使い">弓使い</option>
@@ -63,3 +64,44 @@
     <script src="/app.js"></script>
   </body>
 </html>
+
+<div id="rpg-status-card" style="background: #f9f9f9; border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+    <h3>相棒ステータス</h3>
+    
+    <!-- ★ここに画像タグを移動（カードの中に
+             <!-- 右側：キャラクター画像 -->
+        <div>
+            <img id="character-image" src="/character.jpg" alt="相棒キャラクター" width="100" style="display: block; border-radius: 4px;" />
+        </div>
+
+    <div id="rpg-status-card" style="background: #f9f9f9; border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+    <h3>相棒ステータス</h3>
+    
+    <!-- 左右に並べるためのコンテナ -->
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+        
+        <!-- 左側：文字情報やプルダウン -->
+        <div style="flex-grow: 1;">
+            <!-- キャラ選択 -->
+            <div style="margin-bottom: 10px;">
+              <label for="character-select">相棒を選ぶ:</label>
+              <select id="character-select">
+                <option value="勇者">勇者</option>
+                <option value="弓使い">弓使い</option>
+                <option value="魔法使い">魔法使い</option>
+                <option value="召喚士">召喚士</option>
+                <option value="スライム">スライム(モンスター)</option>
+                <option value="ゴーレム">ゴーレム(モンスター)</option>
+              </select>
+            </div>
+
+            <!--ステータス表示-->
+            <p style="margin: 5px 0;">現在の相棒: <span id="char-name" style="font-weight: bold; color: #333;">勇者</span></p>
+            <p style="margin: 5px 0;">レベル: <span id="character-level" style="font-weight: bold;">1</span></p>
+
+
+
+
+
+
+

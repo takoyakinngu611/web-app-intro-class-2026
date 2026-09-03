@@ -139,8 +139,8 @@ def update_todo(todo_id: int, todo: TodoUpdate):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    # まず、その id のTODOが本当にあるか確認する
-    cursor.execute("SELECT title FROM todos WHERE id = ?", (todo_id,))
+    # まず、その id のTODOが本当にあるか確認する（※ここが抜けているとエラーになります）
+    cursor.execute("SELECT title, done FROM todos WHERE id = ?", (todo_id,))
     existing = cursor.fetchone()  # 1件だけ取り出す。無ければ None が返る
     if existing is None:
         conn.close()  # 見つからないときも接続は閉じてから終わる
@@ -153,37 +153,47 @@ def update_todo(todo_id: int, todo: TodoUpdate):
         (int(todo.done), todo_id),
     )
 
-status = None
-was_done = bool(existing[1])
-if todo.done and not was_done:
-    cursor.execute(
-        "SELECT character_name, level, exp, next_exp FROM game_status LIMIT 1"
-    )
-    current_status = cursor.fetchone()
+    # 未完了から完了に変わったときだけEXPを加算する。
+    status = None
+    was_done = bool(existing[1])
+    if todo.done and not was_done:
+        cursor.execute(
+            "SELECT character_name, level, exp, next_exp FROM game_status LIMIT 1"
+        )
+        current_status = cursor.fetchone()
 
-if current_status is not None:
-    character_name, level, next_exp = current_status
-    exp += EXP_PER_TODO
+        if current_status is not None:
+            character_name, level, exp, next_exp = current_status
+            exp += EXP_PER_TODO
 
-    if exp >= next_exp:
-        exp -= next_exp
-        level += 1
-        next_exp += 50
+            if exp >= next_exp:
+                exp -= next_exp
+                level += 1
+                next_exp += 50
 
-    cursor.execute(
-        """
-        UPDATE game_status
-        SET level = ?, exp = ?, next_exp = ?
-        """
-        (level, exp, next_exp),
-    )
-    status = {
-        "character_name": character_name,
-        "level": level,
-        "exp": exp,
-        "next_exp": next_exp,
+            cursor.execute(
+                """
+                UPDATE game_status
+                SET level = ?, exp = ?, next_exp = ?
+                """,
+                (level, exp, next_exp),
+            )
+            status = {
+                "character_name": character_name,
+                "level": level,
+                "exp": exp,
+                "next_exp": next_exp,
+            }
+
+    conn.commit()  # 更新を確定する
+    conn.close()
+
+    return {
+        "id": todo_id,
+        "title": existing[0],
+        "done": todo.done,
+        "status": status,
     }
-conn.commit()
 
 
 @app.delete("/todos/{todo_id}")  # DELETE /todos/5 で id=5 のTODOを削除
@@ -212,7 +222,7 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # --- アプリ起動時にDBを初期化 ---
 # プログラムが読み込まれたタイミングで、テーブルが無ければ作っておく
-init_db()
+#init_db()
 
 # このファイルを直接 `python main.py` で実行したときだけ、サーバーを起動する
 if __name__ == "__main__":
