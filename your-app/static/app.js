@@ -285,22 +285,6 @@ function showError(message) {
 
 // ページ読み込み時に、まずTODO一覧を取得して表示する（ここがスタート地点）
 loadTodos();
-loadStatus(); // ← ここで一緒に読み込む！
-
-
-
-async function addExperience() {
-  characterExp += 10;
-
-  if (characterExp >= nextExpNeeded) {
-    characterExp -= nextExpNeeded;
-    characterLevel += 1;
-    nextExpNeeded += 50;
-  }
-  
-  updateCharacterStatusUI();
-  await saveStatus();
-}
 
 async function saveStatus() {
   const response = await fetch(STATUS_API_URL, {

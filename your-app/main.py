@@ -28,6 +28,7 @@ app.add_middleware(
 # --- データベース設定 ---
 # データを保存するファイルの名前。アプリと同じフォルダに todo.db が作られる
 DATABASE = "todo.db"
+EXP_PER_TODO = 10
 
 
 def init_db():
@@ -39,11 +40,19 @@ def init_db():
     #   title : TODOの内容（空はNG）
     #   done  : 完了したかどうか（0=未完了, 1=完了）
     cursor.execute("""
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KYE AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS game_status (
-            character_name TEXT NOT NULL,
-            level INTEGER NOT NULL,
-            exp INTEGER NOT NULL,
-            next_exp INTEGER NOT NULL
+        character_name TEXT NOT NULL,
+        level INTEGER NOT NULL,
+        exp INTEGER NOT NULL,
+        next_exp INTEGER NOT NULL DEFAULT 0
         )
     """)
 
@@ -68,7 +77,16 @@ class TodoCreate(BaseModel):
     title: str = Field(min_length=1, max_length=100)
 
 
-class TodoUpdate(BaseModel): done: bool
+class TodoUpdate(BaseModel): 
+    done: bool
+
+
+class StatusUpdate(BaseModel):
+
+    character_name: str = Field(min_length=1, max_length=20)
+    level: int = Field(ge=1)
+    exp: int = Field(ge=0)
+    next_exp: int = Field(ge=0)
 
 
 # --- APIエンドポイント ---
@@ -94,9 +112,6 @@ def get_todos():
         for todo in todos
 
     ]
-
-@app.get("/api/status")
-
 
 @app.post("/todos", status_code=201)  # POST /todos で新規作成（201=作成成功）
 def create_todo(todo: TodoCreate):
@@ -137,11 +152,38 @@ def update_todo(todo_id: int, todo: TodoUpdate):
         "UPDATE todos SET done = ? WHERE id = ?",
         (int(todo.done), todo_id),
     )
-    conn.commit()  # 更新を確定する
 
-    conn.close()
-    # existing は (title,) のタプルなので、先頭を取り出す
-    return {"id": todo_id, "title": existing[0], "done": todo.done}
+status = None
+was_done = bool(existing[1])
+if todo.done and not was_done:
+    cursor.execute(
+        "SELECT character_name, level, exp, next_exp FROM game_status LIMIT 1"
+    )
+    current_status = cursor.fetchone()
+
+if current_status is not None:
+    character_name, level, next_exp = current_status
+    exp += EXP_PER_TODO
+
+    if exp >= next_exp:
+        exp -= next_exp
+        level += 1
+        next_exp += 50
+
+    cursor.execute(
+        """
+        UPDATE game_status
+        SET level = ?, exp = ?, next_exp = ?
+        """
+        (level, exp, next_exp),
+    )
+    status = {
+        "character_name": character_name,
+        "level": level,
+        "exp": exp,
+        "next_exp": next_exp,
+    }
+conn.commit()
 
 
 @app.delete("/todos/{todo_id}")  # DELETE /todos/5 で id=5 のTODOを削除
@@ -181,33 +223,45 @@ if __name__ == "__main__":
 def get_status():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("SELECT character_name, level, exp, next_exp FROM game_status")
+    cursor.execute("SELECT character_name, level, exp, next_exp FROM game_status LIMIT 1"
+    )
     row = cursor.fetchone()
     conn.close()
-    if row:
+
+    if row is None:
+        return {"character_name": "勇者", "level": 1, "exp": 0, "next_exp": 100}
+    
         return {
             "character_name" : row[0],
             "level" : row[1],
             "exp" : row[2],
             "next_exp" : row[3]
         }
-    return {"character_name" : "勇者", "level" : 1, "exp" : 0, "next_exp" : 100}
 
-class StatusUpdate(BaseModel):
-    character_name: str
-    level: int
-    exp: int
-    next_exp: int
 
 @app.put("/api/status")
 def update_status(status: StatusUpdate):
     conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
+    cursor = conn.caller if hasattr(sqlite3, 'caller') else conn.cursor()
     cursor.execute("""
          UPDATE game_status
          SET character_name = ?, level = ?, exp = ?, next_exp = ?
-    """, (status.character_name, status.level, status.exp, status.next_exp))
+    """, 
+    (status.character_name, status.level, status.exp, status.next_exp)
+    )
     conn.commit()
     conn.close()
-    return {"message": "Status updated successfully"}
+
+    return {"character_name": status.character_name,
+            "level": status.level,
+            "exp": status.exp,
+            "next_exp": status.next_exp,
+            }
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+init_db()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
